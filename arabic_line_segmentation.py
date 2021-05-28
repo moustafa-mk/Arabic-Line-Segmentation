@@ -35,8 +35,9 @@ def findLocalMins(arr, threshold):
 
 
 if __name__ == '__main__':
-    img_src = "OCR samples/GretaArabic_Blog_2.png"
+    img_src = "OCR samples/test.jpg"
     img = cv.imread(img_src)
+    img = cv.resize(img, (800, 800))
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img = cv.bitwise_not(img)
     cv.imshow("not", img)
