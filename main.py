@@ -1,4 +1,8 @@
 import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+from findpeaks import findpeaks
+
 
 
 def erode(img):
@@ -13,8 +17,25 @@ def dilate(img):
     return res
 
 
+def findLocalMins(arr, threshold):
+    currentMinimumIdx = 0
+    lastWasPeak = False
+    out = []
+    for i in range(len(arr)):
+        if arr[i] > threshold and not lastWasPeak:
+            out.append(currentMinimumIdx)
+            lastWasPeak = True
+            currentMinimumIdx = i
+        elif arr[i] < threshold:
+            lastWasPeak = False
+            if arr[i] < arr[currentMinimumIdx]:
+                currentMinimumIdx = i
+    return out
+
+
+
 if __name__ == '__main__':
-    img_src = "OCR samples/sample2.png"
+    img_src = "OCR samples/GretaArabic_Blog_2.png"
     img = cv.imread(img_src)
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img = cv.bitwise_not(img)
@@ -23,4 +44,19 @@ if __name__ == '__main__':
     cv.imshow("dilation", dilated)
     eroded = erode(dilated)
     cv.imshow("erosion", eroded)
+    row_sum = np.sum(img, axis=1)
+    average = np.average(row_sum, axis=0)
+    plt.plot(row_sum.tolist())
+    plt.show()
+    fp = findpeaks(lookahead=10)
+    peaks = fp.fit(row_sum)
+    fp.plot()
+    valleys = []
+    for index, row in peaks['df'].iterrows():
+        if row['valley'] :
+            valleys.append(index)
+    img = cv.cvtColor(img, cv.COLOR_GRAY2RGB)
+    for line in valleys:
+        img = cv.line(img, (0, line), (len(img[0]), line), (0,255,0),thickness=1)
+    cv.imshow("Lines", img)
     cv.waitKey()
