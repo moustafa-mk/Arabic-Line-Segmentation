@@ -37,6 +37,7 @@ def findLocalMins(arr, threshold):
 if __name__ == '__main__':
     img_src = "OCR samples/1.jpeg"
     img = cv.imread(img_src)
+    img = cv.resize(img, (800, 800))
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     # TODO: Add a filter to remove noise
     img = cv.bitwise_not(img)
