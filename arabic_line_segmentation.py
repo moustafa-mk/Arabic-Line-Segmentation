@@ -35,16 +35,19 @@ def findLocalMins(arr, threshold):
 
 
 if __name__ == '__main__':
-    img_src = "OCR samples/GretaArabic_Blog_2.png"
+    img_src = "OCR samples/1.jpeg"
     img = cv.imread(img_src)
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    # TODO: Add a filter to remove noise
     img = cv.bitwise_not(img)
+    (thresh, img) = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
     cv.imshow("not", img)
     dilated = dilate(img)
     cv.imshow("dilation", dilated)
     eroded = erode(dilated)
     cv.imshow("erosion", eroded)
     row_sum = np.sum(img, axis=1)
+    col_sum = np.sum(img, axis=0)
     average = np.average(row_sum, axis=0)
     plt.plot(row_sum.tolist())
     plt.show()
