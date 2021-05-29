@@ -40,7 +40,9 @@ def findLocalMins(arr, threshold):
 if __name__ == '__main__':
     img_src = "OCR samples/test.jpg"
     orig_img = cv.imread(img_src)
-    orig_img = cv.resize(orig_img, (800, 800))
+    height, width, _ = orig_img.shape
+    new_height, new_width = min(height, 800), min(width, 800)
+    orig_img = cv.resize(orig_img, (new_height, new_width))
     img = smooth(orig_img)
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img = cv.bitwise_not(img)
