@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from findpeaks import findpeaks
 
 
-
 def erode(img):
     kernel = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
     res = cv.erode(img, kernel)
@@ -33,13 +32,17 @@ def findLocalMins(arr, threshold):
     return out
 
 
-
 if __name__ == '__main__':
-    img_src = "OCR samples/1.jpeg"
+    img_src = "OCR samples/sample2.png"
     img = cv.imread(img_src)
-    img = cv.resize(img, (800, 800))
+    height, width, _ = img.shape
+    if height > 800 or width > 800:
+        img = cv.resize(img, (800, 800))
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    cv.imshow("original", img)
     # TODO: Add a filter to remove noise
+    img = cv.fastNlMeansDenoising(img)
+    cv.imshow("denoised", img)
     img = cv.bitwise_not(img)
     (thresh, img) = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
     cv.imshow("not", img)
@@ -57,10 +60,10 @@ if __name__ == '__main__':
     fp.plot()
     valleys = []
     for index, row in peaks['df'].iterrows():
-        if row['valley'] :
+        if row['valley']:
             valleys.append(index)
     img = cv.cvtColor(img, cv.COLOR_GRAY2RGB)
     for line in valleys:
-        img = cv.line(img, (0, line), (len(img[0]), line), (0,255,0),thickness=1)
+        img = cv.line(img, (0, line), (len(img[0]), line), (0, 255, 0), thickness=1)
     cv.imshow("Lines", img)
     cv.waitKey()
