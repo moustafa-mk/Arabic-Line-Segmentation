@@ -17,7 +17,7 @@ def dilate(img):
 
 
 def smooth(img):
-    res = cv.medianBlur(img, 3)
+    res = cv.fastNlMeansDenoising(img, 100)
     return res
 
 
@@ -38,7 +38,7 @@ def findLocalMins(arr, threshold):
 
 
 if __name__ == '__main__':
-    img_src = "OCR samples/1.jpeg"
+    img_src = "OCR samples/test.jpg"
     orig_img = cv.imread(img_src)
     orig_img = cv.resize(orig_img, (800, 800))
     img = smooth(orig_img)
@@ -62,6 +62,9 @@ if __name__ == '__main__':
         for index, row in peaks['df'].iterrows():
             if row['peak']:
                 score = score + row['y']
+            # More aggressive maximization
+            #if row['valley']:
+            #    score = score - row['y']
         scores.append(score)
         if score > scores[maxIdx]:
             maxIdx = i
