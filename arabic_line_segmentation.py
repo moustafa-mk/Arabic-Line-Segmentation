@@ -63,8 +63,8 @@ if __name__ == '__main__':
             if row['peak']:
                 score = score + row['y']
             # More aggressive maximization
-            #if row['valley']:
-            #    score = score - row['y']
+            if row['valley']:
+                score = score - row['y']
         scores.append(score)
         if score > scores[maxIdx]:
             maxIdx = i
