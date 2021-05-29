@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from findpeaks import findpeaks
 
 
-
 def erode(img):
     kernel = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
     res = cv.erode(img, kernel)
@@ -14,6 +13,11 @@ def erode(img):
 def dilate(img):
     kernel = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
     res = cv.dilate(img, kernel)
+    return res
+
+
+def smooth(img):
+    res = cv.medianBlur(img, 3)
     return res
 
 
@@ -33,20 +37,16 @@ def findLocalMins(arr, threshold):
     return out
 
 
-
 if __name__ == '__main__':
     img_src = "OCR samples/1.jpeg"
-    img = cv.imread(img_src)
-    img = cv.resize(img, (800, 800))
+    orig_img = cv.imread(img_src)
+    orig_img = cv.resize(orig_img, (800, 800))
+    img = smooth(orig_img)
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    # TODO: Add a filter to remove noise
     img = cv.bitwise_not(img)
     (thresh, img) = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
-    cv.imshow("not", img)
     dilated = dilate(img)
-    cv.imshow("dilation", dilated)
     eroded = erode(dilated)
-    cv.imshow("erosion", eroded)
     row_sum = np.sum(img, axis=1)
     col_sum = np.sum(img, axis=0)
     average = np.average(row_sum, axis=0)
@@ -55,12 +55,18 @@ if __name__ == '__main__':
     fp = findpeaks(lookahead=10)
     peaks = fp.fit(row_sum)
     fp.plot()
+    lastTroughIdx = 0
     valleys = []
+
     for index, row in peaks['df'].iterrows():
-        if row['valley'] :
+        if row['valley']:
+            values, bins, _ = plt.hist(row_sum[lastTroughIdx: index])
+            area = sum(np.diff(bins) * values)
+            print("Peak size: %s,%s -> %s; Area: %s" % (str(index), str(lastTroughIdx),str(index - lastTroughIdx), str(area)))
+            lastTroughIdx = index
             valleys.append(index)
-    img = cv.cvtColor(img, cv.COLOR_GRAY2RGB)
+    # orig_img = cv.cvtColor(orig_img, cv.COLOR_GRAY2RGB)
     for line in valleys:
-        img = cv.line(img, (0, line), (len(img[0]), line), (0,255,0),thickness=1)
-    cv.imshow("Lines", img)
+        orig_img = cv.line(orig_img, (0, line), (len(orig_img[0]), line), (0, 255, 0), thickness=1)
+    cv.imshow("Lines", orig_img)
     cv.waitKey()
