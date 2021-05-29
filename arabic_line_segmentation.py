@@ -38,7 +38,7 @@ def findLocalMins(arr, threshold):
 
 
 if __name__ == '__main__':
-    img_src = "OCR samples/test.jpg"
+    img_src = "OCR samples/1.jpeg"
     orig_img = cv.imread(img_src)
     height, width, _ = orig_img.shape
     new_height, new_width = min(height, 800), min(width, 800)
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     # Rotate original image
     image_center = tuple(np.array(orig_img.shape[1::-1]) / 2)
     rot_mat = cv.getRotationMatrix2D(image_center, maxIdx-90, 1.0)
-    orig_img = cv.warpAffine(orig_img, rot_mat, img.shape[1::-1], cv.INTER_LINEAR)
+    orig_img = cv.warpAffine(orig_img, rot_mat, img.shape[1::-1], cv.INTER_LINEAR, borderValue=(255,255,255))
     for line in valleys:
         orig_img = cv.line(orig_img, (0, line), (len(orig_img[0]), line), (0, 255, 0), thickness=1)
     cv.imshow("Lines", orig_img)
