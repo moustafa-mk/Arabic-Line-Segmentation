@@ -46,13 +46,37 @@ if __name__ == '__main__':
     img = cv.bitwise_not(img)
     (thresh, img) = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
     dilated = dilate(img)
-    eroded = erode(dilated)
+    img = erode(dilated)
+    # rotate and get row sum
+    fp = findpeaks(lookahead=10)
+    scores = [0]
+    maxIdx = 0
+    best = img
+    for i in range(180):
+        image_center = tuple(np.array(img.shape[1::-1]) /2)
+        rot_mat = cv.getRotationMatrix2D(image_center, i-90, 1.0)
+        result = cv.warpAffine(img, rot_mat, img.shape[1::-1], cv.INTER_LINEAR)
+        row_sum = np.sum(result, axis=1)
+        peaks = fp.fit(row_sum)
+        score = 0
+        for index, row in peaks['df'].iterrows():
+            if row['peak']:
+                score = score + row['y']
+        scores.append(score)
+        if score > scores[maxIdx]:
+            maxIdx = i
+            best = result
+
+    img = best
+    print(maxIdx)
+    print(scores)
+    plt.plot(scores)
+    plt.show()
+
     row_sum = np.sum(img, axis=1)
-    col_sum = np.sum(img, axis=0)
     average = np.average(row_sum, axis=0)
     plt.plot(row_sum.tolist())
     plt.show()
-    fp = findpeaks(lookahead=10)
     peaks = fp.fit(row_sum)
     fp.plot()
     lastTroughIdx = 0
@@ -66,6 +90,10 @@ if __name__ == '__main__':
             lastTroughIdx = index
             valleys.append(index)
     # orig_img = cv.cvtColor(orig_img, cv.COLOR_GRAY2RGB)
+    # Rotate original image
+    image_center = tuple(np.array(orig_img.shape[1::-1]) / 2)
+    rot_mat = cv.getRotationMatrix2D(image_center, maxIdx-90, 1.0)
+    orig_img = cv.warpAffine(orig_img, rot_mat, img.shape[1::-1], cv.INTER_LINEAR)
     for line in valleys:
         orig_img = cv.line(orig_img, (0, line), (len(orig_img[0]), line), (0, 255, 0), thickness=1)
     cv.imshow("Lines", orig_img)
